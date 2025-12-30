@@ -8,23 +8,20 @@ from langchain_community.vectorstores import FAISS
 # CHANGE: Using API-based embeddings to avoid Python 3.13 compatibility issues
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_core.documents import Document
-from langchain_classic.prompts import ChatPromptTemplate
+from langchain_classic.prompts import ChatPromptTemplate  # FIXED IMPORT
 
 # --- CONFIGURATION ---
 st.set_page_config(page_title="Multimodal RAG", layout="wide")
 
 # 1. API Keys Setup
-
-groq_api_key = st.secrets["GROQ_API_KEY"]
+try:
+    groq_api_key = st.secrets["GROQ_API_KEY"]
     hf_token = st.secrets["HF_TOKEN"]
-
-# Sidebar Fallback for Keys
-with st.sidebar:
-    if not groq_api_key:
+except FileNotFoundError:
+    # Sidebar Fallback for Keys if secrets.toml is missing
+    with st.sidebar:
         groq_api_key = st.text_input("Enter Groq API Key:", type="password")
-    if not hf_token:
         hf_token = st.text_input("Enter HuggingFace Token (HF_...):", type="password")
-        st.caption("Get one for free at huggingface.co/settings/tokens")
 
 if not groq_api_key or not hf_token:
     st.info("⚠️ Please provide both API keys to proceed.")
@@ -46,9 +43,7 @@ try:
         temperature=0.3
     )
     
-    # Embeddings - API BASED (Works on Python 3.13)
-    # This sends text to HuggingFace's server for embedding.
-    # We use a small, fast model served by HF.
+    # Embeddings - API BASED
     embeddings = HuggingFaceEndpointEmbeddings(
         model="sentence-transformers/all-MiniLM-L6-v2",
         task="feature-extraction",
@@ -58,6 +53,8 @@ try:
 except Exception as e:
     st.error(f"Error initializing models: {e}")
     st.stop()
+
+# --- HELPER FUNCTIONS ---
 
 def extract_budget(query):
     """
@@ -78,12 +75,17 @@ def extract_budget(query):
     
     try:
         response = text_llm.invoke(prompt)
-        budget = int(''.join(filter(str.isdigit, response.content))) # Safe cleanup
-        return budget if budget > 0 else None
+        # Extract digits from string (e.g., "Budget is 500" -> "500")
+        budget_str = ''.join(filter(str.isdigit, response.content))
+        if budget_str:
+            budget = int(budget_str)
+            return budget if budget > 0 else None
+        return None
     except:
         return None
 
-
+def encode_image(uploaded_file):
+    return base64.b64encode(uploaded_file.getvalue()).decode('utf-8')
 
 # 3. Vector Store
 @st.cache_resource
@@ -106,10 +108,6 @@ def load_vector_db():
 
 vector_db = load_vector_db()
 
-# 4. Helper
-def encode_image(uploaded_file):
-    return base64.b64encode(uploaded_file.getvalue()).decode('utf-8')
-
 # 5. UI Layout
 st.title("🛒 Visual RAG Shopping Assistant")
 st.markdown("Upload a photo of a product, and I'll find similar items in our inventory.")
@@ -124,7 +122,7 @@ with col1:
 with col2:
     if uploaded_file and vector_db:
         st.subheader("Analysis Results")
-        user_query = st.text_input("Question (Optional)", placeholder="e.g., Is this good for gaming?")
+        user_query = st.text_input("Question (Optional)", placeholder="e.g., Is this good for gaming? I need under $100.")
         
         if st.button("🔍 Analyze Product"):
             try:
@@ -152,34 +150,31 @@ with col2:
                     if budget:
                         st.info(f"💰 Budget Filter Active: max ${budget}")
                     
-                    # 2. Semantic Search (Get more results initially, e.g., k=5, so we have room to filter)
+                    # 2. Semantic Search
                     search_query = f"{image_description} {user_query}"
                     raw_results = vector_db.similarity_search(search_query, k=5)
                     
                     # 3. Apply Python Filtering (Hybrid Search)
                     filtered_docs = []
                     for doc in raw_results:
-                        # SAFE GUARD: Get price and force convert to float
                         try:
                             price_value = doc.metadata.get('price', 0)
-                            # Remove '$' and ',' just in case, then convert to float
                             product_price = float(str(price_value).replace('$', '').replace(',', ''))
                         except ValueError:
-                            product_price = 0 # Default if price is invalid
+                            product_price = 0 
 
-                        # Logic: If budget exists, only keep items CHEAPER than budget
                         if budget:
                             if product_price <= budget:
                                 filtered_docs.append(doc)
                         else:
-                            # No budget? Keep everything
                             filtered_docs.append(doc)
-                    # If we filtered everything out, fallback to raw results so we show SOMETHING
+                    
+                    # Fallback
                     if not filtered_docs:
                         st.warning(f"No exact matches under ${budget}. Showing closest options:")
                         final_docs = raw_results[:2]
                     else:
-                        final_docs = filtered_docs[:2] # Take top 2 that passed the filter
+                        final_docs = filtered_docs[:2]
 
                     context_text = "\n\n".join([f"--- PRODUCT: {d.metadata['name']} (${d.metadata['price']}) ---\n{d.page_content}" for d in final_docs])
 
