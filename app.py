@@ -14,9 +14,9 @@ from langchain_classic.prompts import ChatPromptTemplate
 st.set_page_config(page_title="Multimodal RAG", layout="wide")
 
 # 1. API Keys Setup
-load_dotenv()
-groq_api_key = os.getenv("GROQ_API_KEY")
-hf_token = os.getenv("HF_TOKEN")
+
+groq_api_key = st.secrets["GROQ_API_KEY"]
+    hf_token = st.secrets["HF_TOKEN"]
 
 # Sidebar Fallback for Keys
 with st.sidebar:
