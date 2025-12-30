@@ -1,0 +1,65 @@
+[
+  {
+    "id": 1,
+    "name": "Sony WH-1000XM5",
+    "category": "Headphones",
+    "description": "Noise cancelling wireless headphones, 30 hour battery life, black, over-ear. Great for travel.",
+    "price": 350
+  },
+  {
+    "id": 2,
+    "name": "Logitech MX Master 3S",
+    "category": "Mouse",
+    "description": "Ergonomic wireless performance mouse, quiet clicks, 8K DPI, graphite color. Best for coding.",
+    "price": 99
+  },
+  {
+    "id": 3,
+    "name": "Keychron K2 Mechanical Keyboard",
+    "category": "Keyboard",
+    "description": "75% layout, wireless mechanical keyboard, RGB backlight, aluminum frame, Gateron Brown switches.",
+    "price": 89
+  },
+  {
+    "id": 4,
+    "name": "Herman Miller Aeron",
+    "category": "Chair",
+    "description": "Ergonomic office chair, graphite mesh, adjustable lumbar support, size B. High end office furniture.",
+    "price": 1200
+  },
+  {
+    "id": 5,
+    "name": "JBL Tune 510BT",
+    "category": "Headphones",
+    "description": "Budget wireless on-ear headphones, pure bass sound, 40H battery, quick charge. Good for students.",
+    "price": 49
+  },
+  {
+    "id": 6,
+    "name": "Audio-Technica ATH-M50x",
+    "category": "Headphones",
+    "description": "Professional studio monitor headphones, wired, closed-back, high clarity. Best for mixing and editing.",
+    "price": 169
+  },
+  {
+    "id": 7,
+    "name": "Apple AirPods Max",
+    "category": "Headphones",
+    "description": "Premium over-ear noise cancelling headphones, computational audio, aluminum cups, spatial audio.",
+    "price": 549
+  },
+  {
+    "id": 8,
+    "name": "Sennheiser HD 450BT",
+    "category": "Headphones",
+    "description": "Mid-range wireless noise cancelling headphones, active noise cancellation, 30H battery life.",
+    "price": 129
+  },
+  {
+    "id": 9,
+    "name": "Bose QuietComfort 45",
+    "category": "Headphones",
+    "description": "Iconic noise cancelling headphones, lightweight comfort, aware mode, high-fidelity audio.",
+    "price": 279
+  }
+]
