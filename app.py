@@ -2,7 +2,7 @@ import streamlit as st
 import json
 import base64
 import os
-from dotenv import load_dotenv
+
 from langchain_groq import ChatGroq
 from langchain_community.vectorstores import FAISS
 # CHANGE: Using API-based embeddings to avoid Python 3.13 compatibility issues
