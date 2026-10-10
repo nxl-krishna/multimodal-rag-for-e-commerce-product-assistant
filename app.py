@@ -8,7 +8,16 @@ from shop_assistant.retrieval import ProductRetriever
 
 st.set_page_config(page_title="Visual RAG Shopping Assistant", page_icon="🛒", layout="wide")
 
+def _secret(name: str) -> str | None:
+    try:
+        return st.secrets.get(name)
+    except Exception:  # no secrets.toml
+        return None
+
+
 settings = Settings()
+settings.groq_api_key = settings.groq_api_key or _secret("GROQ_API_KEY")
+settings.hf_token = settings.hf_token or _secret("HF_TOKEN")
 
 with st.sidebar:
     st.header("Settings")
